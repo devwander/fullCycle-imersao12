@@ -2,12 +2,13 @@ package kafka
 
 import (
 	"fmt"
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	"log"
 	"os"
-
-	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
+// KafkaConsumer holds all consumer logic and settings of Apache Kafka connections/
+// Also has a Message channel which is a channel where the messages are going to be pushed
 type KafkaConsumer struct {
 	MsgChan chan *ckafka.Message
 }
@@ -19,6 +20,7 @@ func NewKafkaConsumer(msgChan chan *ckafka.Message) *KafkaConsumer {
 	}
 }
 
+// Consume consumes all message pulled from apache kafka and sent it to message channel
 func (k *KafkaConsumer) Consume() {
 	configMap := &ckafka.ConfigMap{
 		"bootstrap.servers": os.Getenv("KafkaBootstrapServers"),
@@ -26,9 +28,9 @@ func (k *KafkaConsumer) Consume() {
 	}
 	c, err := ckafka.NewConsumer(configMap)
 	if err != nil {
-		log.Fatal("error consuming kafka message:" + err.Error())
+		log.Fatalf("error consuming kafka message:" + err.Error())
 	}
-	topics := []string{os.Getenv("kafkaReadTopic")}
+	topics := []string{os.Getenv("KafkaReadTopic")}
 	c.SubscribeTopics(topics, nil)
 	fmt.Println("Kafka consumer has been started")
 	for {
